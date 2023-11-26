@@ -1,10 +1,13 @@
 # app.py
 
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
+from flask_restful import Api, Resource
 from . import db
 
 app = Flask(__name__)
+api = Api(app)
+
 
 app.config.from_mapping(
     DATABASE=os.path.join(app.instance_path, 'tourdeflask.sqlite'),
@@ -19,6 +22,7 @@ except OSError:
 db.init_app(app)
 
 teacher_data = {
+    'secret': 'The cake is a lie',
     "UUID": "67fda282-2bca-41ef-9caf-039cc5c8dd69",
     "title_before": "Mgr.",
     "first_name": "Petra",
@@ -45,9 +49,16 @@ teacher_data = {
 def hello_world():
     return "Hello TdA"
 
+# API endpoint
+class TeacherApi(Resource):
+    def get(self):
+        return jsonify({**teacher_data, 'secret': 'The cake is a lie'})
+
+api.add_resource(TeacherApi, '/api')
+
 @app.route('/lecturer')
 def teacher_profile():
     return render_template('lecturer.html', teacher_name=f"{teacher_data['first_name']} {teacher_data['last_name']}", teacher_data=teacher_data)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
