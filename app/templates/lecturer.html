@@ -1,0 +1,41 @@
+<!-- templates/teacher.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ teacher_name }} - Lecturer Profile</title>
+</head>
+<body>
+    <h1>{{ teacher_name }}</h1>
+
+    <img src="{{ teacher_data['picture_url'] }}" alt="{{ teacher_name }}">
+
+    <p><strong>Title Before:</strong> {{ teacher_data['title_before'] }}</p>
+    <p><strong>First Name:</strong> {{ teacher_data['first_name'] }}</p>
+    <p><strong>Middle Name:</strong> {{ teacher_data['middle_name'] }}</p>
+    <p><strong>Last Name:</strong> {{ teacher_data['last_name'] }}</p>
+    <p><strong>Title After:</strong> {{ teacher_data['title_after'] }}</p>
+
+    <p><strong>Location:</strong> {{ teacher_data['location'] }}</p>
+    <p><strong>Claim:</strong> {{ teacher_data['claim'] }}</p>
+
+    <p><strong>Bio:</strong></p>
+    <div>{{ teacher_data['bio']|safe }}</div>
+
+    <p><strong>Tags:</strong></p>
+    <ul>
+        {% for tag in teacher_data['tags'] %}
+            <li>{{ tag['name'] }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><strong>Price Per Hour:</strong> {{ teacher_data['price_per_hour'] }}</p>
+
+    <p><strong>Contact:</strong></p>
+    <ul>
+        <li><strong>Telephone Numbers:</strong> {{ teacher_data['contact']['telephone_numbers']|join(', ') }}</li>
+        <li><strong>Emails:</strong> {{ teacher_data['contact']['emails']|join(', ') }}</li>
+    </ul>
+</body>
+</html>
