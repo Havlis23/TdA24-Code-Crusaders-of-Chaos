@@ -50,11 +50,11 @@ def hello_world():
     return "Hello TdA"
 
 # API endpoint
-class TeacherApi(Resource):
+class LecturerApi(Resource):
     def get(self):
-        return jsonify({**teacher_data, 'secret': 'The cake is a lie'})
+        return jsonify({'secret': 'The cake is a lie'}) #**teacher_data,
 
-api.add_resource(TeacherApi, '/api')
+api.add_resource(LecturerApi, '/api')
 
 @app.route('/lecturer')
 def teacher_profile():
