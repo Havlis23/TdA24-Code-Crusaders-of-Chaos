@@ -67,33 +67,38 @@
 <body>
     <h1>{{ teacher_name }}</h1>
 
-    <img src="{{ teacher_data['picture_url'] }}" alt="{{ teacher_name }}">
+    <img src="{{ lecturer['picture_url'] }}" alt="{{ teacher_name }}">
 
-    <p><strong>Title Before:</strong> {{ teacher_data['title_before'] }}</p>
-    <p><strong>First Name:</strong> {{ teacher_data['first_name'] }}</p>
-    <p><strong>Middle Name:</strong> {{ teacher_data['middle_name'] }}</p>
-    <p><strong>Last Name:</strong> {{ teacher_data['last_name'] }}</p>
-    <p><strong>Title After:</strong> {{ teacher_data['title_after'] }}</p>
+    <p><strong>Title Before:</strong> {{ lecturer['title_before'] }}</p>
+    <p><strong>First Name:</strong> {{ lecturer['first_name'] }}</p>
+    <p><strong>Middle Name:</strong> {{ lecturer['middle_name'] }}</p>
+    <p><strong>Last Name:</strong> {{ lecturer['last_name'] }}</p>
+    <p><strong>Title After:</strong> {{ lecturer['title_after'] }}</p>
 
-    <p><strong>Location:</strong> {{ teacher_data['location'] }}</p>
-    <p><strong>Claim:</strong> {{ teacher_data['claim'] }}</p>
+    <p><strong>Location:</strong> {{ lecturer['location'] }}</p>
+    <p><strong>Claim:</strong> {{ lecturer['claim'] }}</p>
 
     <p><strong>Bio:</strong></p>
-    <div>{{ teacher_data['bio']|safe }}</div>
+    <div>{{ lecturer['bio']|safe }}</div>
 
     <p><strong>Tags:</strong></p>
     <ul>
-        {% for tag in teacher_data['tags'] %}
+        {% for tag in lecturer['tags'] %}
             <li>{{ tag['name'] }}</li>
         {% endfor %}
     </ul>
 
-    <p><strong>Price Per Hour:</strong> {{ teacher_data['price_per_hour'] }}</p>
+    <p><strong>Price Per Hour:</strong> {{ lecturer['price_per_hour'] }}</p>
 
     <p><strong>Contact:</strong></p>
     <ul>
-        <li><strong>Telephone Numbers:</strong> {{ teacher_data['contact']['telephone_numbers']|join(', ') }}</li>
-        <li><strong>Emails:</strong> {{ teacher_data['contact']['emails']|join(', ') }}</li>
+        {% if lecturer['contact'] and isinstance(lecturer['contact'], dict) %}
+            <li><strong>Telephone Numbers:</strong> {{ lecturer['contact']['telephone_numbers']|join(', ') }}</li>
+            <li><strong>Emails:</strong> {{ lecturer['contact']['emails']|join(', ') }}</li>
+        {% elif lecturer['contact'] and isinstance(lecturer['contact'], tuple) %}
+            <li><strong>Telephone Numbers:</strong> {{ lecturer['contact'][0]|join(', ') }}</li>
+            <li><strong>Emails:</strong> {{ lecturer['contact'][1]|join(', ') }}</li>
+        {% endif %}
     </ul>
 </body>
 </html>
