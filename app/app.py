@@ -64,7 +64,6 @@ lecturers_data = [
     }
 ]
 
-
 @app.route('/')
 def hello_world():
     return "Hello TdA"
