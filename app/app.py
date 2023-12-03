@@ -16,6 +16,10 @@ connection = MySQLdb.connect(
 app = Flask(__name__)
 
 
+@app.route("/members")
+def members():
+    return {"members": ["member1", "member2", "member3"]}
+
 @app.route('/')
 def hello_world():
     return "Hello TdA"
