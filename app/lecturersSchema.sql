@@ -11,3 +11,23 @@ CREATE TABLE `tdapp2024`.`lecturers` (
   `bio` VARCHAR(300) NULL,
   `price_per_hour` INT NULL,
   PRIMARY KEY (`uuid`));
+
+
+
+CREATE TABLE LecturerData
+(
+    uuid         varchar(100) PRIMARY KEY,
+    TitleBefore  VARCHAR(50),
+    FirstName    VARCHAR(50),
+    MiddleName   VARCHAR(50),
+    LastName     VARCHAR(50),
+    TitleAfter   VARCHAR(50),
+    PictureURL   VARCHAR(255),
+    Location     VARCHAR(50),
+    Claim        TEXT,
+    Bio          TEXT,
+    PricePerHour DECIMAL(10, 2),
+    TagID        INT,
+    ContactID    INT,
+    FOREIGN KEY (uuid) REFERENCES LecturerTags (uuid)
+);

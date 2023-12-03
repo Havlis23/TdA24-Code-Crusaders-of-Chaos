@@ -1,132 +1,125 @@
-
 import os
 import uuid
 from flask import Flask, jsonify, request, render_template
-from . import db
-
 from dotenv import load_dotenv
+import MySQLdb
 
 load_dotenv()
-import os
-import MySQLdb
 
 connection = MySQLdb.connect(
     host=os.getenv("DB_HOST"),
     user=os.getenv("DB_USERNAME"),
     passwd=os.getenv("DB_PASSWORD"),
     db=os.getenv("DB_NAME"),
-    autocommit=True,
-    ssl_mode="VERIFY_IDENTITY",
-    ssl={
-        "ca": "/etc/ssl/cert.pem"
-    }
 )
 
 app = Flask(__name__)
 
-app.config.from_mapping(
-    DATABASE=os.path.join(app.instance_path, 'tourdeflask.sqlite'),
-)
-
-# Ensure the instance folder exists
-try:
-    os.makedirs(app.instance_path)
-except OSError:
-    pass
-
-db.init_app(app)
-db.init_app(app)
-
-# Sample data
-lecturers_data = [
-    {
-        'title_before': 'Mgr.',
-        'first_name': 'Petra',
-        'middle_name': 'Swil',
-        'last_name': 'Plachá',
-        'title_after': 'MBA',
-        'picture_url': 'https://picsum.photos/200',
-        'location': 'Brno',
-        'claim': 'Bez dobré prezentace je i nejlepší myšlenka k ničemu.',
-        'bio': '<b>Formátovaný text</b> s <i>bezpečnými</i> tagy.',
-        'tags': [
-            {'name': 'Marketing'}
-        ],
-        'price_per_hour': 720,
-        'contact': {
-            'telephone_numbers': [
-                '+123 777 338 111'
-            ],
-            'emails': [
-                'user@example.com'
-            ]
-        }
-    }
-]
 
 @app.route('/')
 def hello_world():
     return "Hello TdA"
 
+
 @app.route("/api/lecturers", methods=["POST", "GET"])
 def lecturers():
     if request.method == "POST":
-        new_lecturer = request.json if isinstance(request.json, dict) else {}
-        new_lecturer['uuid'] = str(uuid.uuid4())[:36]
+        # Create a new lecturer
+        new_lecturer = request.json
+        new_lecturer['uuid'] = str(uuid.uuid4())
+        new_lecturer['tag_id'] = 1
+        new_lecturer['contact_id'] = 1
 
-        # Insert the new lecturer into the PlanetScale database
         with connection.cursor() as cursor:
             sql = """
-            INSERT INTO lecturers
-            (uuid, title_before, first_name, middle_name, last_name, title_after, picture_url, location, claim, bio, price_per_hour)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            cursor.execute(
-                sql,
-                (
-                    new_lecturer["uuid"],
-                    new_lecturer["title_before"],
-                    new_lecturer["first_name"],
-                    new_lecturer["middle_name"],
-                    new_lecturer["last_name"],
-                    new_lecturer["title_after"],
-                    new_lecturer["picture_url"],
-                    new_lecturer["location"],
-                    new_lecturer["claim"],
-                    new_lecturer["bio"],
-                    new_lecturer["price_per_hour"],
-                ),
-            )
+                INSERT INTO LecturerData (uuid, title_before, first_name, middle_name, last_name, title_after, picture_url, location, claim, bio, tag_id, price_per_hour, contact_id)
+                VALUES (%(uuid)s, %(title_before)s, %(first_name)s, %(middle_name)s, %(last_name)s, %(title_after)s, %(picture_url)s, %(location)s, %(claim)s, %(bio)s, %(tag_id)s, %(price_per_hour)s, %(contact_id)s)
+                """
+            cursor.execute(sql, new_lecturer)
+            connection.commit()
 
         return jsonify(new_lecturer), 200
 
+
     elif request.method == "GET":
-        # Get all lecturers from the PlanetScale database
+        # Get all lecturers with tags and contact information from the MySQL database
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM lecturers"
+            sql = """SELECT
+                LecturerData.uuid,
+                LecturerData.title_before,
+                LecturerData.first_name,
+                LecturerData.middle_name,
+                LecturerData.last_name,
+                LecturerData.title_after,
+                LecturerData.picture_url,
+                LecturerData.location,
+                LecturerData.claim,
+                LecturerData.bio,
+                LecturerData.price_per_hour,
+                LecturerTags.name AS tag_name,
+                LecturerContact.telephone_number,
+                LecturerContact.email
+            FROM LecturerData
+            LEFT JOIN LecturerTags ON LecturerData.tag_id = LecturerTags.tag_id
+            LEFT JOIN LecturerContact ON LecturerData.contact_id = LecturerContact.contact_id
+            """
             cursor.execute(sql)
             lecturers_data = cursor.fetchall()
 
         return jsonify(lecturers_data), 200
 
+
 @app.route('/api/lecturers/<uuid>', methods=['GET', 'PUT', 'DELETE'])
 def lecturer_by_uuid(uuid):
-    # Fetch lecturer from the database based on UUID
+    # Fetch lecturer with tags and contact information from the database based on UUID
     with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM lecturers WHERE uuid=%s", (uuid,))
-        lecturer = cursor.fetchone()
+        sql = """
+        SELECT
+        LecturerData.uuid,
+        LecturerData.title_before,
+        LecturerData.first_name,
+        LecturerData.middle_name,
+        LecturerData.last_name,
+        LecturerData.title_after,
+        LecturerData.picture_url,
+        LecturerData.location,
+        LecturerData.claim,
+        LecturerData.bio,
+        LecturerData.price_per_hour,
+        LecturerTags.name AS tag_name,
+        LecturerContact.telephone_number,
+        LecturerContact.email
+        FROM LecturerData
+        LEFT JOIN LecturerTags ON LecturerData.tag_id = LecturerTags.tag_id
+        LEFT JOIN LecturerContact ON LecturerData.contact_id = LecturerContact.contact_id
+        WHERE LecturerData.uuid = %s
+        """
+        cursor.execute(sql, (uuid,))
+        lecturer_data = cursor.fetchone()
 
-    if lecturer is None:
+    if lecturer_data is None:
         return jsonify({'code': 404, 'message': 'Lecturer not found'}), 404
 
     if request.method == 'GET':
-        # Get a specific lecturer
-        return render_template('lecturer.html', lecturer=lecturer)
+        # Extract the relevant data from the lecturer object and organize it into a dictionary
+        lecturer_dict = {
+            'uuid': lecturer_data[0],
+            'title_before': lecturer_data[1],
+            'first_name': lecturer_data[2],
+            'middle_name': lecturer_data[3],
+            'last_name': lecturer_data[4],
+            'title_after': lecturer_data[5],
+            'picture_url': lecturer_data[6],
+            'location': lecturer_data[7],
+            'claim': lecturer_data[8],
+            'bio': lecturer_data[9],
+            'price_per_hour': lecturer_data[10],
+            'tags': [{'name': lecturer_data[11]}],  # Assuming 'tag_name' is the 11th column
+        }
 
-@app.route('/lecturer')
-def lecturer_profile():
-    return render_template('lecturer.html', teacher_name=f"{lecturers_data['first_name']} {lecturers_data['last_name']}",
-                           teacher_data=lecturers_data)
+        # Pass the lecturer dictionary to the template
+        return render_template('lecturer.html', lecturer=lecturer_dict)
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

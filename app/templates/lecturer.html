@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ teacher_name }} - Lecturer Profile</title>
+    <title>{{ lecturer['first_name'] }} {{ lecturer['last_name'] }} - Lecturer Profile</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -65,39 +65,37 @@
     </style>
 </head>
 <body>
-    <h1>{{ teacher_name }}</h1>
+<h1>{{ lecturer['first_name'] }} {{ lecturer['last_name'] }}</h1>
 
-    <img src="{{ lecturer['picture_url'] }}" alt="{{ teacher_name }}">
+<img src="{{ lecturer['picture_url'] }}" alt="{{ lecturer['first_name'] }} {{ lecturer['last_name'] }}">
 
-    <p><strong>Title Before:</strong> {{ lecturer['title_before'] }}</p>
-    <p><strong>First Name:</strong> {{ lecturer['first_name'] }}</p>
-    <p><strong>Middle Name:</strong> {{ lecturer['middle_name'] }}</p>
-    <p><strong>Last Name:</strong> {{ lecturer['last_name'] }}</p>
-    <p><strong>Title After:</strong> {{ lecturer['title_after'] }}</p>
+<p><strong>Title Before:</strong> {{ lecturer['title_before'] }}</p>
+<p><strong>First Name:</strong> {{ lecturer['first_name'] }}</p>
+<p><strong>Middle Name:</strong> {{ lecturer['middle_name'] }}</p>
+<p><strong>Last Name:</strong> {{ lecturer['last_name'] }}</p>
+<p><strong>Title After:</strong> {{ lecturer['title_after'] }}</p>
 
-    <p><strong>Location:</strong> {{ lecturer['location'] }}</p>
-    <p><strong>Claim:</strong> {{ lecturer['claim'] }}</p>
+<p><strong>Location:</strong> {{ lecturer['location'] }}</p>
+<p><strong>Claim:</strong> {{ lecturer['claim'] }}</p>
 
-    <p><strong>Bio:</strong></p>
-    <div>{{ lecturer['bio']|safe }}</div>
+<p><strong>Bio:</strong></p>
+<div>{{ lecturer['bio']|safe }}</div>
 
-    <p><strong>Tags:</strong></p>
-    <ul>
-        {% for tag in lecturer['tags'] %}
-            <li>{{ tag['name'] }}</li>
-        {% endfor %}
-    </ul>
+<p><strong>Tags:</strong></p>
+<ul>
+    {% for tag in lecturer['tags'] %}
+    <li>{{ tag['name'] }}</li>
+    {% endfor %}
+</ul>
 
-    <p><strong>Price Per Hour:</strong> {{ lecturer['price_per_hour'] }}</p>
+<p><strong>Price Per Hour:</strong> {{ lecturer['price_per_hour'] }}</p>
+
 
     <p><strong>Contact:</strong></p>
     <ul>
         {% if lecturer['contact'] and isinstance(lecturer['contact'], dict) %}
             <li><strong>Telephone Numbers:</strong> {{ lecturer['contact']['telephone_numbers']|join(', ') }}</li>
             <li><strong>Emails:</strong> {{ lecturer['contact']['emails']|join(', ') }}</li>
-        {% elif lecturer['contact'] and isinstance(lecturer['contact'], tuple) %}
-            <li><strong>Telephone Numbers:</strong> {{ lecturer['contact'][0]|join(', ') }}</li>
-            <li><strong>Emails:</strong> {{ lecturer['contact'][1]|join(', ') }}</li>
         {% endif %}
     </ul>
 </body>
